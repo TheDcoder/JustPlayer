@@ -892,7 +892,7 @@ public class PlayerActivity extends Activity {
                 break;
             case KeyEvent.KEYCODE_BACK:
                 if (isTvBox) {
-                    if (controllerVisible && player != null && player.isPlaying()) {
+                    if (controllerVisible && player != null) {
                         playerView.hideController();
                         return true;
                     } else {
@@ -1446,7 +1446,7 @@ public class PlayerActivity extends Activity {
                         playerView.setControllerShowTimeoutMs(CONTROLLER_TIMEOUT);
                     }
                 } else {
-                    playerView.setControllerShowTimeoutMs(-1);
+                    playerView.setControllerShowTimeoutMs(CONTROLLER_TIMEOUT / 4);
                 }
             }
 
