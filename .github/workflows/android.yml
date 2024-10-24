@@ -3,9 +3,9 @@ name: Android CI
 on:
   workflow_dispatch:
   push:
-    branches: [ master ]
+    branches: [ improved ]
   pull_request:
-    branches: [ master ]
+    branches: [ improved ]
 
 jobs:
   build:
@@ -24,8 +24,26 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew build
-    - name: Store APK files as artifacts
-      uses: actions/upload-artifact@v2
+    - name: Store Unsigned APK files
+      uses: actions/upload-artifact@v4
       with:
-        name: APK Files
+        name: Unsigned APK Files
         path: app/build/outputs/apk/**/*.apk
+    - name: Move APKs
+      run: |
+        mkdir apks
+        mv app/build/outputs/apk/*/release/*.apk apks
+    - name: ZipAlign & Sign APK
+      uses: kevin-david/zipalign-sign-android-release@v2.0.1
+      id: sign_app
+      with:
+        releaseDirectory: apks
+        signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+        alias: ${{ secrets.ALIAS }}
+        keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+        keyPassword: ${{ secrets.KEY_PASSWORD }}
+    - name: Store Signed APK files
+      uses: actions/upload-artifact@v4
+      with:
+        name: Signed APK Files
+        path: apks
