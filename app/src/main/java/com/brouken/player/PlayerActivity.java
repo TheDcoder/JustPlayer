@@ -825,6 +825,7 @@ public class PlayerActivity extends Activity {
                 } else {
                     player.play();
                 }
+                playerView.hideController();
                 return true;
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
