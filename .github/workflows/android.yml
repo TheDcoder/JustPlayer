@@ -33,8 +33,10 @@ jobs:
           mkdir apks
           mv app/build/outputs/apk/*/release/*.apk apks
       - name: ZipAlign & Sign APK
-        uses: kevin-david/zipalign-sign-android-release@v2.0.1
+        uses: TheDcoder/zipalign-sign-android-release@main
         id: sign_app
+        env:
+          BUILD_TOOLS_VERSION: 35.0.0
         with:
           releaseDirectory: apks
           signingKeyBase64: ${{ secrets.SIGNING_KEY }}
