@@ -1,16 +1,14 @@
 name: Android CI
 
 on:
-  workflow_dispatch:
   push:
-    branches: [ improved ]
-  pull_request:
-    branches: [ improved ]
+    tags:
+      - 'v0.*'
 
 jobs:
   build:
+    if: github.ref_type == 'tag'
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
         with:
@@ -49,10 +47,10 @@ jobs:
           name: Signed APK Files
           path: apks
       - name: Automatic Release
-        uses: "marvinpinto/action-automatic-releases@latest"
+        uses: softprops/action-gh-release@v2
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "latest"
-          prerelease: true
-          title: "Cutting Edge Builds"
-          files: apks/*.apk
+          make_latest: 'true'
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          generate_release_notes: true
+          files: apks/*-signed.apk
+          fail_on_unmatched_files: true
