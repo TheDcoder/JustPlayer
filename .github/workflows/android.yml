@@ -2,14 +2,13 @@ name: Android CI
 
 on:
   push:
-    branches: [master]
-  pull_request:
-    branches: [master]
+    tags:
+      - 'v0.*'
 
 jobs:
   build:
+    if: github.ref_type == 'tag'
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
         with:
@@ -22,3 +21,36 @@ jobs:
         run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew build
+      - name: Store Unsigned APK files
+        uses: actions/upload-artifact@v4
+        with:
+          name: Unsigned APK Files
+          path: app/build/outputs/apk/**/*.apk
+      - name: Move APKs
+        run: |
+          mkdir apks
+          mv app/build/outputs/apk/*/release/*.apk apks
+      - name: ZipAlign & Sign APK
+        uses: TheDcoder/zipalign-sign-android-release@main
+        id: sign_app
+        env:
+          BUILD_TOOLS_VERSION: 35.0.0
+        with:
+          releaseDirectory: apks
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+      - name: Store Signed APK files
+        uses: actions/upload-artifact@v4
+        with:
+          name: Signed APK Files
+          path: apks
+      - name: Automatic Release
+        uses: softprops/action-gh-release@v2
+        with:
+          make_latest: 'true'
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          generate_release_notes: true
+          files: apks/*-signed.apk
+          fail_on_unmatched_files: true
