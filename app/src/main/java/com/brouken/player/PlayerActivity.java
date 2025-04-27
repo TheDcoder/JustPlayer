@@ -1245,13 +1245,12 @@ public class PlayerActivity extends Activity {
             }
         }
 
-//        player = AssPlayerKt.buildWithAssSupport(
-//                playerBuilder,
-//                this,
-//                AssRenderType.OPEN_GL,
-//                new DefaultDataSource.Factory(this),
-//                extractorsFactory);
-        player = playerBuilder.build();
+        player = AssPlayerKt.buildWithAssSupport(
+                playerBuilder,
+                this,
+                AssRenderType.LEGACY,
+                new DefaultDataSource.Factory(this),
+                extractorsFactory);
 
         AudioAttributes audioAttributes = new AudioAttributes.Builder()
                 .setUsage(C.USAGE_MEDIA)
