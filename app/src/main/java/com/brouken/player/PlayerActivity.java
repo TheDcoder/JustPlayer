@@ -1248,7 +1248,7 @@ public class PlayerActivity extends Activity {
         player = AssPlayerKt.buildWithAssSupport(
                 playerBuilder,
                 this,
-                AssRenderType.LEGACY,
+                AssRenderType.CANVAS,
                 new DefaultDataSource.Factory(this),
                 extractorsFactory);
 
