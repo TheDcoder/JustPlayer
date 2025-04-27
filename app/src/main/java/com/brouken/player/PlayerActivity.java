@@ -1320,7 +1320,7 @@ public class PlayerActivity extends Activity {
                 MediaItem.SubtitleConfiguration subtitle = SubtitleUtils.buildSubtitle(this, mPrefs.subtitleUri, null, true);
                 mediaItemBuilder.setSubtitleConfigurations(Collections.singletonList(subtitle));
             }
-            player.setMediaItem(mediaItemBuilder.build(), mPrefs.getPosition());
+            player.setMediaItem(mediaItemBuilder.build());
 
             try {
                 if (loudnessEnhancer != null) {
