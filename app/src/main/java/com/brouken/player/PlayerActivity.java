@@ -1248,9 +1248,11 @@ public class PlayerActivity extends Activity {
         player = AssPlayerKt.buildWithAssSupport(
                 playerBuilder,
                 this,
-                AssRenderType.CANVAS,
+                AssRenderType.OVERLAY,
+                playerView.getSubtitleView(),
                 new DefaultDataSource.Factory(this),
-                extractorsFactory);
+                extractorsFactory,
+                new DefaultRenderersFactory(this));
 
         AudioAttributes audioAttributes = new AudioAttributes.Builder()
                 .setUsage(C.USAGE_MEDIA)
