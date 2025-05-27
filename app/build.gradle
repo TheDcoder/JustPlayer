@@ -112,7 +112,7 @@ dependencies {
     implementation 'androidx.preference:preference:1.2.1'
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     implementation 'com.sigpwned:chardet4j:75.1.2'
-    implementation('io.github.peerless2012:ass-media:0.3.0-alpha02') {
+    implementation('io.github.peerless2012:ass-media:0.3.0-alpha03') {
         exclude group: "androidx.media3"
     }
     implementation project(path: ':doubletapplayerview')
