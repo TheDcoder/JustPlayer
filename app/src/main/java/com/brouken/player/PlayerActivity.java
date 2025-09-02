@@ -1186,6 +1186,8 @@ public class PlayerActivity extends Activity {
         }
 
         trackSelector = new DefaultTrackSelector(this);
+        trackSelector.setParameters(trackSelector.buildUponParameters()
+                .setAllowInvalidateSelectionsOnRendererCapabilitiesChange(true));
         if (mPrefs.tunneling) {
             trackSelector.setParameters(trackSelector.buildUponParameters()
                     .setTunnelingEnabled(true)
