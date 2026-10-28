@@ -6,7 +6,7 @@
 [![GitHub all releases](https://img.shields.io/github/downloads/moneytoo/Player/total?logo=github&cacheSeconds=3600)](https://github.com/moneytoo/Player/releases/latest)
 [![Google Play](https://img.shields.io/endpoint?color=green&logo=google-play&url=https%3A%2F%2Fplay.cuzi.workers.dev%2Fplay%3Fi%3Dcom.brouken.player%26l%3Ddownloads%26m%3D%24totalinstalls)](https://play.google.com/store/apps/details?id=com.brouken.player)
 [![Google Play](https://img.shields.io/endpoint?color=green&logo=google-play&url=https%3A%2F%2Fplay.cuzi.workers.dev%2Fplay%3Fi%3Dcom.brouken.player%26l%3Drating%26m%3D%25E2%2598%2585%2520%24rating)](https://play.google.com/store/apps/details?id=com.brouken.player)
-[![Media3](https://img.shields.io/badge/Media3-1.10.0-007ec6?cacheSeconds=3600)](https://github.com/androidx/media/releases/tag/1.10.0)
+[![Media3](https://img.shields.io/badge/Media3-1.11.1-007ec6?cacheSeconds=3600)](https://github.com/androidx/media/releases/tag/1.11.1)
 [![Weblate project translated](https://img.shields.io/weblate/progress/just-player?logo=weblate&logoColor=white&cacheSeconds=36000)](https://hosted.weblate.org/engage/just-player/)
 [![Subreddit subscribers](https://img.shields.io/reddit/subreddit-subscribers/JustPlayer?label=r%2FJustPlayer&logo=reddit&logoColor=white&cacheSeconds=3600)](https://www.reddit.com/r/JustPlayer/)
 
@@ -165,9 +165,9 @@ Here's a comparison table presenting all available and significant open source v
 | [Kodi](https://github.com/xbmc/xbmc)                              | ?                                                                                                                                                                       |
 | [mpv](https://github.com/mpv-android/mpv-android)                 | [libmpv](https://github.com/mpv-player/mpv)                                                                                                                             |
 | [mpvEx](https://github.com/marlboro-advance/mpvEx)                | [libmpv](https://github.com/mpv-player/mpv)                                                                                                                             |
-| [mpvKt](https://github.com/abdallahmehiz/mpvKt)                   | [libmpv](https://github.com/mpv-player/mpv)                                                                                                                             |
 | [Next Player](https://github.com/anilbeesetti/nextplayer)         | [ExoPlayer](https://exoplayer.dev/)                                                                                                                                     |
 | [Nova Video Player](https://github.com/nova-video-player/aos-AVP) | MediaPlayer                                                                                                                                                             |
+| [Only Player](https://github.com/Kindness-Kismet/only_player)     | [ExoPlayer](https://exoplayer.dev/)                                                                                                                                     |
 | [VLC](https://code.videolan.org/videolan/vlc-android)             | [libVLC](https://www.videolan.org/vlc/libvlc.html)                                                                                                                      |
 
 To find other video players (including non-FOSS), check out [a list on IzzyOnDroid](https://android.izzysoft.de/applists/category/named/multimedia_video_player) or my list of [awesome F-Droid apps](https://github.com/moneytoo/awesome-fdroid).
