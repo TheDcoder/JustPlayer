@@ -1,0 +1,141 @@
+name: Sync upstream releases
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: Optional comma-separated upstream release tags; blank processes all unmirrored releases
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: upstream-release-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch || github.ref_name }}
+          fetch-depth: 0
+          token: ${{ github.token }}
+
+      - name: Select upstream releases
+        id: select
+        env:
+          TAGS: ${{ inputs.tags || '' }}
+        run: |
+          set -euo pipefail
+
+          releases_file="$RUNNER_TEMP/upstream-releases.tsv"
+          selected_file="$RUNNER_TEMP/selected-releases.tsv"
+          requested_file="$RUNNER_TEMP/requested-tags.txt"
+          : > "$releases_file"
+
+          page=1
+          while true; do
+            response=$(curl --fail --silent --show-error \
+              "https://api.github.com/repos/moneytoo/Player/releases?per_page=100&page=$page")
+            jq -r '.[] | select(.draft == false and .published_at != null) | select(.tag_name | startswith("v0.")) | [.published_at, .tag_name] | @tsv' \
+              <<< "$response" >> "$releases_file"
+            count=$(jq 'length' <<< "$response")
+            if (( count < 100 )); then
+              break
+            fi
+            page=$((page + 1))
+          done
+
+          sort -o "$releases_file" "$releases_file"
+
+          if [[ -n "$TAGS" ]]; then
+            IFS=',' read -ra requested_tags <<< "$TAGS"
+            : > "$requested_file"
+            for tag in "${requested_tags[@]}"; do
+              tag="${tag#"${tag%%[![:space:]]*}"}"
+              tag="${tag%"${tag##*[![:space:]]}"}"
+              [[ -n "$tag" ]] || continue
+              if [[ ! "$tag" =~ ^v0\.[[:alnum:]_.+-]+$ ]]; then
+                echo "Invalid release tag: $tag" >&2
+                exit 1
+              fi
+              if ! awk -F '\t' -v tag="$tag" '$2 == tag { found = 1 } END { exit !found }' "$releases_file"; then
+                echo "No published upstream v0.* release found for tag: $tag" >&2
+                exit 1
+              fi
+              printf '%s\n' "$tag" >> "$requested_file"
+            done
+            if [[ ! -s "$requested_file" ]]; then
+              echo 'The manual tag list did not contain any tags.' >&2
+              exit 1
+            fi
+            sort -u -o "$requested_file" "$requested_file"
+            awk -F '\t' 'NR == FNR { wanted[$0] = 1; next } $2 in wanted' \
+              "$requested_file" "$releases_file" > "$selected_file"
+          else
+            cp "$releases_file" "$selected_file"
+          fi
+
+          if [[ ! -s "$selected_file" ]]; then
+            echo 'No published upstream v0.* releases to process.'
+            exit 0
+          fi
+
+          cat "$selected_file"
+
+      - name: Merge, tag, and dispatch releases
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch || github.ref_name }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git remote add upstream https://github.com/moneytoo/Player.git
+
+          while IFS=$'\t' read -r published_at tag; do
+            [[ -n "$tag" ]] || continue
+            if git show-ref --verify --quiet "refs/tags/$tag"; then
+              echo "$tag already exists; skipping."
+              continue
+            fi
+
+            upstream_ref="refs/remotes/upstream-tags/$tag"
+            git fetch --no-tags upstream "refs/tags/$tag:$upstream_ref"
+            upstream_commit=$(git rev-parse "$upstream_ref^{commit}")
+            if git merge-base --is-ancestor "$upstream_commit" HEAD; then
+              echo "$tag is already included in the default branch; skipping without creating a tag or release."
+              continue
+            else
+              ancestry_status=$?
+              if [[ "$ancestry_status" -ne 1 ]]; then
+                echo "Unable to check ancestry for $tag." >&2
+                exit "$ancestry_status"
+              fi
+            fi
+
+            if ! git merge --no-ff -m "Merge $tag" "$upstream_ref"; then
+              if ! git merge --abort; then
+                echo "Unable to abort the failed merge for $tag; stopping." >&2
+                exit 1
+              fi
+              echo "Merge failed while processing $tag; stopping." >&2
+              exit 1
+            fi
+
+            git tag "$tag" HEAD
+            git push --atomic origin "HEAD:$DEFAULT_BRANCH" "refs/tags/$tag"
+            gh workflow run android.yml --ref "$tag"
+          done < "$RUNNER_TEMP/selected-releases.tsv"

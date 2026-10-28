@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v0.*'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -43,15 +44,25 @@ jobs:
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
       - name: Store Signed APK files
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: Signed APK Files
           path: apks
+      - name: Fetch upstream release metadata
+        id: upstream_release
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          release=$(curl --fail --silent --show-error \
+            "https://api.github.com/repos/moneytoo/Player/releases/tags/$TAG_NAME")
+          printf 'prerelease=%s\n' "$(jq -r '.prerelease' <<< "$release")" >> "$GITHUB_OUTPUT"
+          jq -r '.body // ""' <<< "$release" > upstream-release-notes.md
       - name: Automatic Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           make_latest: 'true'
-          prerelease: ${{ contains(github.ref_name, '-') }}
-          generate_release_notes: true
+          prerelease: ${{ steps.upstream_release.outputs.prerelease }}
+          body_path: upstream-release-notes.md
+          generate_release_notes: false
           files: apks/*-signed.apk
           fail_on_unmatched_files: true
