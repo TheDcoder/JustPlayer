@@ -19,3 +19,18 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Keep line numbers for readable stack traces (mapping.txt is needed to retrace)
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
+
+# Media3 UI internals accessed via reflection
+# CustomDefaultTimeBar
+-keepclassmembers class androidx.media3.ui.DefaultTimeBar {
+    private android.graphics.Rect scrubberBar;
+    private void startScrubbing(long);
+}
+# PlayerActivity
+-keepclassmembers class androidx.media3.ui.PlayerControlView {
+    private androidx.media3.ui.TrackNameProvider trackNameProvider;
+}
